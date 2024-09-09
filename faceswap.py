@@ -22,7 +22,7 @@ def getFaceAnalyser(model_path: str, providers, det_size=(320, 320)):
     face_analyser.prepare(ctx_id=0, det_size=det_size)
     return face_analyser
 
-def get_many_faces(face_analyser, frame:np.ndarray):
+def get_many_faces(face_analyser, frame: np.ndarray):
     try:
         face = face_analyser.get(frame)
         return sorted(face, key=lambda x: x.bbox[0])
@@ -63,22 +63,18 @@ def process(source_img: Union[Image.Image, List], target_img: Image.Image, sourc
         result = temp_frame
     else:
         print("No target faces found!")
-    
+
     result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
     return result_image
 
-if __name__ == "__main__":
-    # Upload files using the Colab interface
-    from google.colab import files
-    uploaded = files.upload()
-    
-    # Set filenames based on uploaded files
-    source_img_path = 'source.jpg'  # Replace with the actual filename if different
-    target_img_path = 'target.jpg'  # Replace with the actual filename if different
+def main():
+    # User input for image paths
+    source_img_paths = input("Enter the paths for source images, separated by commas: ").split(',')
+    target_img_path = input("Enter the path for the target image: ")
 
     # Load images
-    source_img = [Image.open(source_img_path)]
-    target_img = Image.open(target_img_path)
+    source_img = [Image.open(img_path.strip()) for img_path in source_img_paths]
+    target_img = Image.open(target_img_path.strip())
 
     # Download model from Hugging Face if not already downloaded
     model_url = "https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128_fp16.onnx"
@@ -86,7 +82,10 @@ if __name__ == "__main__":
 
     # Process the images
     result_image = process(source_img, target_img, "-1", "-1", model_path)
-    
+
     # Save the result
     result_image.save("result.png")
     print(f'Result saved successfully: result.png')
+
+if __name__ == "__main__":
+    main()
